@@ -48,10 +48,10 @@ export default function PatientRegistration() {
           <div className="hidden md:flex items-center gap-4">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-primary text-lg">psychology</span>
-              <p className="text-slate-600 dark:text-slate-300 text-sm font-medium">AI-Powered Disease Diagnosis</p>
+              <p className="text-slate-600 dark:text-slate-300 text-sm font-medium">Disease Diagnosis using Support Vector Machine Algorithm </p>
             </div>
             <div className="w-px h-6 bg-slate-200 dark:bg-slate-700"></div>
-            <button 
+            <button
               onClick={() => navigate('/doctor')}
               className="text-sm font-semibold text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
             >

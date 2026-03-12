@@ -84,7 +84,7 @@ def init_db():
             id            INT AUTO_INCREMENT PRIMARY KEY,
             diagnosis_id  INT          NOT NULL,
             patient_id    INT          NOT NULL,
-            doctor_id     INT,
+            doctor_id     INT, 
             status        VARCHAR(50)  DEFAULT 'Pending',
             doctor_notes  TEXT,
             created_at    DATETIME     DEFAULT CURRENT_TIMESTAMP,
@@ -94,6 +94,14 @@ def init_db():
             FOREIGN KEY (doctor_id)    REFERENCES doctors(id)
         )
     """)
+
+    # Reset AUTO_INCREMENT to 1 for any empty tables
+    # so that IDs start from 1 after all rows are deleted
+    for table in ["referrals", "diagnoses", "patients", "doctors"]:
+        cursor.execute(f"SELECT COUNT(*) AS c FROM {table}")
+        count = cursor.fetchone()[0]
+        if count == 0:
+            cursor.execute(f"ALTER TABLE {table} AUTO_INCREMENT = 1")
 
     conn.commit()
     cursor.close()

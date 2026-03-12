@@ -48,7 +48,11 @@ export default function DoctorDashboard() {
             </a>
           </nav>
         </div>
-        <div className="mt-auto p-6">
+        <div className="mt-auto p-6 flex flex-col gap-2">
+          <button onClick={() => navigate('/')} className="flex w-full items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white/80 font-medium">
+            <span className="material-symbols-outlined">person</span>
+            <span>Patient Portal</span>
+          </button>
           <button onClick={() => navigate('/doctor')} className="flex w-full items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white/80 font-medium">
             <span className="material-symbols-outlined">logout</span>
             <span>Sign Out</span>
