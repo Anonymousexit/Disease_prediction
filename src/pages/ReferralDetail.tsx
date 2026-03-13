@@ -36,8 +36,8 @@ export default function ReferralDetail() {
     }
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center font-display text-slate-500">Loading referral...</div>;
-  if (!referral) return <div className="min-h-screen flex items-center justify-center font-display text-red-500">Referral not found.</div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center font-display text-slate-500 bg-background-light dark:bg-background-dark">Loading referral...</div>;
+  if (!referral) return <div className="min-h-screen flex items-center justify-center font-display text-red-500 bg-background-light dark:bg-background-dark">Referral not found.</div>;
 
   return (
     <div className="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">

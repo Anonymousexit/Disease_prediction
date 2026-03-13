@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 import json
+import os
 
 from database import init_db, get_db
 from ml_service import MLService
@@ -15,10 +16,26 @@ from ml_service import MLService
 # ── App setup ─────────────────────────────────────────────────────────
 app = FastAPI(title="MediDiag API", version="1.0.0")
 
+
+def _parse_cors_origins() -> list[str]:
+    raw_origins = os.getenv("CORS_ORIGINS")
+    if raw_origins:
+        return [o.strip() for o in raw_origins.split(",") if o.strip()]
+
+    return [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ]
+
+
+cors_origins = _parse_cors_origins()
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=cors_origins,
+    allow_credentials="*" not in cors_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )

@@ -3,7 +3,11 @@
  * Centralised fetch calls to the FastAPI backend.
  */
 
-const API = '/api';
+const configuredBaseUrl = ((import.meta as any).env?.VITE_API_BASE_URL as string | undefined)?.trim();
+const API_BASE_URL = configuredBaseUrl ? configuredBaseUrl.replace(/\/$/, '') : '';
+const API = API_BASE_URL
+  ? (API_BASE_URL.endsWith('/api') ? API_BASE_URL : `${API_BASE_URL}/api`)
+  : '/api';
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
