@@ -1,89 +1,30 @@
 """
-Database layer - MySQL setup and schema creation.
+Database layer — MySQL setup and schema creation.
 No seed data: doctors and patients register via the frontend.
-
-Environment variables:
-- MYSQL_URL or DATABASE_URL (recommended for managed databases)
-  Example: mysql://user:password@host:3306/medidiag
-- Or discrete values:
-  MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE
-- Optional:
-  MYSQL_AUTO_CREATE_DB=true|false (default true for localhost, false otherwise)
-  MYSQL_SSL_DISABLED=true|false  (default true for localhost, false otherwise)
-  MYSQL_SSL_CA=/path/to/ca.pem
 """
-import os
-from urllib.parse import unquote, urlparse
-
 import mysql.connector
-
-
-def _as_bool(value: str | None, *, default: bool) -> bool:
-    if value is None:
-        return default
-    return value.strip().lower() in {"1", "true", "yes", "on"}
-
-
-def _mysql_config_from_env() -> dict:
-    mysql_url = os.getenv("MYSQL_URL") or os.getenv("DATABASE_URL")
-
-    if mysql_url:
-        parsed = urlparse(mysql_url)
-        if not parsed.scheme.startswith("mysql"):
-            raise ValueError("MYSQL_URL/DATABASE_URL must start with mysql://")
-
-        database_name = parsed.path.lstrip("/")
-        if not database_name:
-            raise ValueError("MYSQL_URL/DATABASE_URL must include a database name")
-
-        config = {
-            "host": parsed.hostname or "localhost",
-            "port": parsed.port or 3306,
-            "user": unquote(parsed.username or ""),
-            "password": unquote(parsed.password or ""),
-            "database": database_name,
-        }
-    else:
-        config = {
-            "host": os.getenv("MYSQL_HOST", "localhost"),
-            "port": int(os.getenv("MYSQL_PORT", "3306")),
-            "user": os.getenv("MYSQL_USER", "root"),
-            "password": os.getenv("MYSQL_PASSWORD", "root1234"),
-            "database": os.getenv("MYSQL_DATABASE", "medidiag"),
-        }
-
-    host = str(config.get("host", "")).lower()
-    ssl_disabled_default = host in {"localhost", "127.0.0.1"}
-    config["ssl_disabled"] = _as_bool(
-        os.getenv("MYSQL_SSL_DISABLED"),
-        default=ssl_disabled_default,
-    )
-
-    ssl_ca = os.getenv("MYSQL_SSL_CA")
-    if ssl_ca:
-        config["ssl_ca"] = ssl_ca
-
-    return config
-
+from mysql.connector import Error
 
 # ── MySQL connection config ──────────────────────────────────────────
-MYSQL_CONFIG = _mysql_config_from_env()
-MYSQL_AUTO_CREATE_DB = _as_bool(
-    os.getenv("MYSQL_AUTO_CREATE_DB"),
-    default=str(MYSQL_CONFIG.get("host", "")).lower() in {"localhost", "127.0.0.1"},
-)
+MYSQL_CONFIG = {
+    "host": "localhost",
+    "port": 3306,
+    "user": "root",
+    "password": "root1234",
+    "database": "medidiag",
+}
 
 
 def _create_database_if_not_exists():
     """Connect to MySQL server (without database) and create the DB."""
-    if not MYSQL_AUTO_CREATE_DB:
-        return
-
-    server_config = {k: v for k, v in MYSQL_CONFIG.items() if k != "database"}
-    conn = mysql.connector.connect(**server_config)
+    conn = mysql.connector.connect(
+        host=MYSQL_CONFIG["host"],
+        port=MYSQL_CONFIG["port"],
+        user=MYSQL_CONFIG["user"],
+        password=MYSQL_CONFIG["password"],
+    )
     cursor = conn.cursor()
-    safe_db_name = str(MYSQL_CONFIG["database"]).replace("`", "")
-    cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{safe_db_name}`")
+    cursor.execute("CREATE DATABASE IF NOT EXISTS medidiag")
     cursor.close()
     conn.close()
 
@@ -143,7 +84,7 @@ def init_db():
             id            INT AUTO_INCREMENT PRIMARY KEY,
             diagnosis_id  INT          NOT NULL,
             patient_id    INT          NOT NULL,
-            doctor_id     INT, 
+            doctor_id     INT,
             status        VARCHAR(50)  DEFAULT 'Pending',
             doctor_notes  TEXT,
             created_at    DATETIME     DEFAULT CURRENT_TIMESTAMP,
@@ -154,23 +95,7 @@ def init_db():
         )
     """)
 
-    # Reset AUTO_INCREMENT to 1 for any empty tables
-    # so that IDs start from 1 after all rows are deleted
-    for table in ["referrals", "diagnoses", "patients", "doctors"]:
-        cursor.execute(f"SELECT COUNT(*) AS c FROM {table}")
-        row = cursor.fetchone()
-        if isinstance(row, dict):
-            count_value = row.get("c", 0)
-        elif row is None:
-            count_value = 0
-        else:
-            count_value = row[0]
-
-        count = str(count_value).strip()
-        if count == "0":
-            cursor.execute(f"ALTER TABLE {table} AUTO_INCREMENT = 1")
-
     conn.commit()
     cursor.close()
     conn.close()
-    print(f"MySQL database '{MYSQL_CONFIG['database']}' initialized")
+    print("✅ MySQL database 'medidiag' initialised")
