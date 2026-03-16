@@ -1,101 +1,95 @@
 """
-Database layer — MySQL setup and schema creation.
-No seed data: doctors and patients register via the frontend.
+Database layer — PostgreSQL setup and schema creation.
+Uses psycopg2 to connect to Render's managed PostgreSQL database.
+
+Render automatically provides a DATABASE_URL environment variable
+when you link a PostgreSQL database to your web service.
 """
-import mysql.connector
-from mysql.connector import Error
+import psycopg2
+import psycopg2.extras
+import os
 
-# ── MySQL connection config ──────────────────────────────────────────
-MYSQL_CONFIG = {
-    "host": "localhost",
-    "port": 3306,
-    "user": "root",
-    "password": "root1234",
-    "database": "medidiag",
-}
+# Render provides DATABASE_URL automatically.
+# For local dev, set DATABASE_URL in your .env file or use the
+# individual DB_* variables below as a fallback.
+DATABASE_URL = os.environ.get("DATABASE_URL", "")
 
-
-def _create_database_if_not_exists():
-    """Connect to MySQL server (without database) and create the DB."""
-    conn = mysql.connector.connect(
-        host=MYSQL_CONFIG["host"],
-        port=MYSQL_CONFIG["port"],
-        user=MYSQL_CONFIG["user"],
-        password=MYSQL_CONFIG["password"],
-    )
-    cursor = conn.cursor()
-    cursor.execute("CREATE DATABASE IF NOT EXISTS medidiag")
-    cursor.close()
-    conn.close()
+# Individual fallback params (used only if DATABASE_URL is not set)
+_host     = os.environ.get("DB_HOST",     "localhost")
+_port     = int(os.environ.get("DB_PORT", 5432))
+_user     = os.environ.get("DB_USER",     "postgres")
+_password = os.environ.get("DB_PASSWORD", "")
+_database = os.environ.get("DB_NAME",     "medidiag")
 
 
 def get_db():
-    """Return a new MySQL connection with dictionary cursor support."""
-    conn = mysql.connector.connect(**MYSQL_CONFIG)
-    return conn
+    """Return a new PostgreSQL connection."""
+    if DATABASE_URL:
+        # Render's DATABASE_URL uses 'postgres://' — psycopg2 requires 'postgresql://'
+        url = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+        return psycopg2.connect(url)
+    return psycopg2.connect(
+        host=_host, port=_port, user=_user,
+        password=_password, dbname=_database,
+    )
 
 
 def init_db():
-    """Create the database and tables if they don't exist."""
-    _create_database_if_not_exists()
+    """Create all tables if they do not already exist. Safe to run on every startup."""
     conn = get_db()
     cursor = conn.cursor()
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS patients (
-            id          INT AUTO_INCREMENT PRIMARY KEY,
-            full_name   VARCHAR(255) NOT NULL,
-            age         INT          NOT NULL,
-            gender      VARCHAR(20)  NOT NULL,
-            email       VARCHAR(255),
-            phone       VARCHAR(50),
-            created_at  DATETIME     DEFAULT CURRENT_TIMESTAMP
+            id         SERIAL PRIMARY KEY,
+            full_name  VARCHAR(255) NOT NULL,
+            age        INT          NOT NULL,
+            gender     VARCHAR(20)  NOT NULL,
+            email      VARCHAR(255),
+            phone      VARCHAR(50),
+            created_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
         )
     """)
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS doctors (
-            id              INT AUTO_INCREMENT PRIMARY KEY,
-            name            VARCHAR(255) NOT NULL,
-            email           VARCHAR(255) NOT NULL UNIQUE,
-            password        VARCHAR(255) NOT NULL,
-            specialization  VARCHAR(255) DEFAULT 'General Practice',
-            created_at      DATETIME     DEFAULT CURRENT_TIMESTAMP
+            id             SERIAL PRIMARY KEY,
+            name           VARCHAR(255) NOT NULL,
+            email          VARCHAR(255) NOT NULL UNIQUE,
+            password       VARCHAR(255) NOT NULL,
+            specialization VARCHAR(255) DEFAULT 'General Practice',
+            created_at     TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
         )
     """)
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS diagnoses (
-            id                INT AUTO_INCREMENT PRIMARY KEY,
-            patient_id        INT          NOT NULL,
-            symptoms          JSON         NOT NULL,
-            predicted_disease VARCHAR(255) NOT NULL,
-            confidence        DOUBLE       NOT NULL,
-            probabilities     JSON         NOT NULL,
+            id                SERIAL PRIMARY KEY,
+            patient_id        INT              NOT NULL REFERENCES patients(id),
+            symptoms          JSONB            NOT NULL,
+            predicted_disease VARCHAR(255)     NOT NULL,
+            confidence        DOUBLE PRECISION NOT NULL,
+            probabilities     JSONB            NOT NULL,
             medicine          TEXT,
-            requires_referral TINYINT      DEFAULT 0,
-            created_at        DATETIME     DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (patient_id) REFERENCES patients(id)
+            requires_referral SMALLINT         DEFAULT 0,
+            created_at        TIMESTAMP        DEFAULT CURRENT_TIMESTAMP
         )
     """)
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS referrals (
-            id            INT AUTO_INCREMENT PRIMARY KEY,
-            diagnosis_id  INT          NOT NULL,
-            patient_id    INT          NOT NULL,
-            doctor_id     INT,
-            status        VARCHAR(50)  DEFAULT 'Pending',
-            doctor_notes  TEXT,
-            created_at    DATETIME     DEFAULT CURRENT_TIMESTAMP,
-            updated_at    DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            FOREIGN KEY (diagnosis_id) REFERENCES diagnoses(id),
-            FOREIGN KEY (patient_id)   REFERENCES patients(id),
-            FOREIGN KEY (doctor_id)    REFERENCES doctors(id)
+            id           SERIAL PRIMARY KEY,
+            diagnosis_id INT         NOT NULL REFERENCES diagnoses(id),
+            patient_id   INT         NOT NULL REFERENCES patients(id),
+            doctor_id    INT         REFERENCES doctors(id),
+            status       VARCHAR(50) DEFAULT 'Pending',
+            doctor_notes TEXT,
+            created_at   TIMESTAMP   DEFAULT CURRENT_TIMESTAMP,
+            updated_at   TIMESTAMP   DEFAULT CURRENT_TIMESTAMP
         )
     """)
 
     conn.commit()
     cursor.close()
     conn.close()
-    print("✅ MySQL database 'medidiag' initialised")
+    print("✅ PostgreSQL tables initialised")

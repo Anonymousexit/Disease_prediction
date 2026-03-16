@@ -3,6 +3,6 @@ uvicorn[standard]
 scikit-learn
 pandas
 openpyxl
-mysql-connector-python
+psycopg2-binary
 python-multipart
 pydantic

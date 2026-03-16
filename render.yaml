@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: medidiag-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      # Render auto-fills DATABASE_URL from the linked database below
+      - key: DATABASE_URL
+        fromDatabase:
+          name: medidiag-db
+          property: connectionString
+      # Set this to your Vercel frontend URL after deploying the frontend
+      # e.g. https://your-app.vercel.app
+      - key: CORS_ORIGINS
+        sync: false
+
+databases:
+  - name: medidiag-db
+    plan: free
+    databaseName: medidiag
