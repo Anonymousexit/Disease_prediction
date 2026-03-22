@@ -4,6 +4,7 @@
  */
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import PatientLogin from './pages/PatientLogin';
 import PatientRegistration from './pages/PatientRegistration';
 import SymptomSelection from './pages/SymptomSelection';
 import DiagnosisResult from './pages/DiagnosisResult';
@@ -17,7 +18,9 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<PatientRegistration />} />
+        <Route path="/" element={<PatientLogin />} />
+        <Route path="/patient/login" element={<PatientLogin />} />
+        <Route path="/patient/register" element={<PatientRegistration />} />
         <Route path="/symptoms" element={<SymptomSelection />} />
         <Route path="/diagnosis" element={<DiagnosisResult />} />
         <Route path="/history" element={<DiagnosisHistory />} />

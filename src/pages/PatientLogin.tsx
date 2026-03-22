@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
 
-export default function DoctorLogin() {
+export default function PatientLogin() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -14,9 +14,9 @@ export default function DoctorLogin() {
     setLoading(true);
     setError('');
     try {
-      const doctor = await api.loginDoctor(email, password);
-      sessionStorage.setItem('doctor', JSON.stringify(doctor));
-      navigate('/doctor/dashboard');
+      const patient = await api.loginPatient(email, password);
+      sessionStorage.setItem('patient', JSON.stringify(patient));
+      navigate('/symptoms');
     } catch (err: any) {
       setError('Invalid email or password. Please try again.');
     } finally {
@@ -38,13 +38,13 @@ export default function DoctorLogin() {
               <h1 className="text-slate-900 dark:text-slate-100 text-2xl font-bold tracking-tight">MediDiag</h1>
             </div>
             <div className="inline-flex items-center rounded-full bg-primary/10 px-4 py-1.5 border border-primary/20">
-              <span className="text-primary text-sm font-semibold tracking-wide uppercase">Doctor Portal</span>
+              <span className="text-primary text-sm font-semibold tracking-wide uppercase">Patient Portal</span>
             </div>
           </header>
 
           <div className="text-center mb-8">
-            <h2 className="text-slate-900 dark:text-slate-100 text-3xl font-bold leading-tight">Welcome, Doctor.</h2>
-            <p className="text-slate-500 dark:text-slate-400 mt-2">Please enter your credentials to access the clinical dashboard.</p>
+            <h2 className="text-slate-900 dark:text-slate-100 text-3xl font-bold leading-tight">Welcome Back.</h2>
+            <p className="text-slate-500 dark:text-slate-400 mt-2">Please enter your credentials to access the diagnostic portal.</p>
           </div>
 
           <form className="space-y-6" onSubmit={handleLogin}>
@@ -56,7 +56,7 @@ export default function DoctorLogin() {
                 Email Address
               </label>
               <div className="relative">
-                <input required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/20 focus:border-primary h-12 px-4 transition-all" placeholder="name@hospital.com" type="email" />
+                <input required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/20 focus:border-primary h-12 px-4 transition-all" placeholder="email@example.com" type="email" />
               </div>
             </div>
 
@@ -76,8 +76,8 @@ export default function DoctorLogin() {
             </div>
 
             <div className="flex items-center gap-2 px-1">
-              <input className="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4" id="remember" type="checkbox" />
-              <label className="text-slate-600 dark:text-slate-400 text-sm" htmlFor="remember">Keep me logged in for 24 hours</label>
+              <input className="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4" id="remember-patient" type="checkbox" />
+              <label className="text-slate-600 dark:text-slate-400 text-sm" htmlFor="remember-patient">Keep me logged in for 24 hours</label>
             </div>
 
             <button disabled={loading} className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-12 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 mt-4 disabled:opacity-60" type="submit">
@@ -88,10 +88,10 @@ export default function DoctorLogin() {
 
           <footer className="mt-10 pt-6 border-t border-slate-100 dark:border-slate-800 text-center">
             <p className="text-slate-600 dark:text-slate-400 text-sm mb-3">
-              Don't have an account? <a className="text-primary font-bold hover:underline" href="/doctor/register">Register here</a>
+              Don't have an account? <a className="text-primary font-bold hover:underline" href="/patient/register">Register here</a>
             </p>
             <p className="text-slate-600 dark:text-slate-400 text-sm mb-3">
-              Are you a patient? <a className="text-primary font-bold hover:underline" href="/patient/login">Go to Patient Portal</a>
+              Are you a doctor? <a className="text-primary font-bold hover:underline" href="/doctor">Go to Doctor Portal</a>
             </p>
             <p className="text-slate-500 dark:text-slate-400 text-xs">
               Protected by enterprise-grade 256-bit encryption. <br />

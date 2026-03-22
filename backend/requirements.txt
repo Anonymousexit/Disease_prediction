@@ -4,5 +4,5 @@ scikit-learn
 pandas
 openpyxl
 psycopg2-binary
-python-multipart
+python-multipart    
 pydantic

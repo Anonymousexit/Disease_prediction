@@ -12,10 +12,25 @@ export default function PatientRegistration() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      setLoading(false);
+      return;
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      setLoading(false);
+      return;
+    }
+
     try {
       const patient = await api.createPatient({
         full_name: fullName,
@@ -23,11 +38,16 @@ export default function PatientRegistration() {
         gender,
         email: email || undefined,
         phone: phone || undefined,
+        password,
       } as any);
       sessionStorage.setItem('patient', JSON.stringify(patient));
       navigate('/symptoms');
     } catch (err: any) {
-      setError(err.message || 'Registration failed. Please try again.');
+      if (err.message?.includes('409')) {
+        setError('A patient with this email already exists.');
+      } else {
+        setError(err.message || 'Registration failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -97,13 +117,10 @@ export default function PatientRegistration() {
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-slate-700 dark:text-slate-200 text-sm font-semibold flex justify-between">
-                  Email
-                  <span className="text-slate-400 text-xs font-normal italic">Optional</span>
-                </label>
+                <label className="text-slate-700 dark:text-slate-200 text-sm font-semibold">Email</label>
                 <div className="relative">
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">mail</span>
-                  <input value={email} onChange={(e) => setEmail(e.target.value)} className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="email@example.com" type="email" />
+                  <input required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="email@example.com" type="email" />
                 </div>
               </div>
 
@@ -118,6 +135,17 @@ export default function PatientRegistration() {
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="flex flex-col gap-2">
+                  <label className="text-slate-700 dark:text-slate-200 text-sm font-semibold">Password</label>
+                  <input required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="••••••••" type="password" minLength={6} />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-slate-700 dark:text-slate-200 text-sm font-semibold">Confirm Password</label>
+                  <input required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="••••••••" type="password" minLength={6} />
+                </div>
+              </div>
+
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm">{error}</div>
               )}
@@ -128,10 +156,15 @@ export default function PatientRegistration() {
               </button>
             </form>
 
-            <p className="mt-8 text-center text-slate-400 dark:text-slate-500 text-xs">
-              Your data is processed securely and encrypted. <br />
-              By continuing, you agree to our <a className="underline hover:text-primary" href="#">Terms of Service</a>.
-            </p>
+            <footer className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 text-center">
+              <p className="text-slate-600 dark:text-slate-400 text-sm mb-2">
+                Already have an account? <a className="text-primary font-bold hover:underline" href="/patient/login">Sign in here</a>
+              </p>
+              <p className="text-slate-400 dark:text-slate-500 text-xs">
+                Your data is processed securely and encrypted. <br />
+                By continuing, you agree to our <a className="underline hover:text-primary" href="#">Terms of Service</a>.
+              </p>
+            </footer>
           </div>
         </div>
 
