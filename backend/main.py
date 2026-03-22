@@ -23,12 +23,7 @@ def _parse_cors_origins() -> list[str]:
     raw_origins = os.getenv("CORS_ORIGINS")
     if raw_origins:
         return [o.strip() for o in raw_origins.split(",") if o.strip()]
-    return [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ]
+    return ["*"]
 
 
 cors_origins = _parse_cors_origins()
