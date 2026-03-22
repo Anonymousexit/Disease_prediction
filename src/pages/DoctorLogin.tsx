@@ -91,7 +91,7 @@ export default function DoctorLogin() {
               Don't have an account? <a className="text-primary font-bold hover:underline" href="/doctor/register">Register here</a>
             </p>
             <p className="text-slate-600 dark:text-slate-400 text-sm mb-3">
-              Are you a patient? <a className="text-primary font-bold hover:underline" href="/patient/login">Go to Patient Portal</a>
+              Are you a patient? <a className="text-primary font-bold hover:underline" href="/">Go to Patient Portal</a>
             </p>
             <p className="text-slate-500 dark:text-slate-400 text-xs">
               Protected by enterprise-grade 256-bit encryption. <br />

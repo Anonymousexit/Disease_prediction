@@ -118,10 +118,8 @@ export const api = {
   getSymptoms: ()                       => get<Symptom[]>('/symptoms'),
 
   // Patients
-  createPatient: (data: Omit<Patient, 'id'> & { password: string }) => post<Patient>('/patients', data),
+  createPatient: (data: Omit<Patient, 'id'>) => post<Patient>('/patients', data),
   getPatient:    (id: number)           => get<Patient>(`/patients/${id}`),
-  loginPatient:  (email: string, password: string) =>
-    post<Patient>('/patients/login', { email, password }),
 
   // Diagnosis
   diagnose: (patientId: number, symptoms: string[]) =>
