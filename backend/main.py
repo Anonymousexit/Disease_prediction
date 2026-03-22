@@ -52,17 +52,11 @@ class PatientCreate(BaseModel):
     gender: str
     email: Optional[str] = None
     phone: Optional[str] = None
-    password: str
 
 
 class DiagnoseRequest(BaseModel):
     patient_id: int
     symptoms: list[str]
-
-
-class PatientLoginRequest(BaseModel):
-    email: str
-    password: str
 
 
 class DoctorLoginRequest(BaseModel):
@@ -126,38 +120,18 @@ def get_symptoms():
 
 @app.post("/api/patients")
 def create_patient(patient: PatientCreate):
-    # Check if email already exists
-    if patient.email:
-        existing = _fetchone("SELECT id FROM patients WHERE email = %s", (patient.email,))
-        if existing:
-            raise HTTPException(409, "A patient with this email already exists")
-
     conn = get_db()
     cur = conn.cursor()
     cur.execute(
-        """INSERT INTO patients (full_name, age, gender, email, phone, password)
-           VALUES (%s, %s, %s, %s, %s, %s) RETURNING id""",
-        (patient.full_name, patient.age, patient.gender, patient.email, patient.phone, patient.password),
+        """INSERT INTO patients (full_name, age, gender, email, phone)
+           VALUES (%s, %s, %s, %s, %s) RETURNING id""",
+        (patient.full_name, patient.age, patient.gender, patient.email, patient.phone),
     )
     pid = cur.fetchone()[0]
     conn.commit()
     cur.close()
     conn.close()
-    data = patient.model_dump()
-    del data["password"]
-    return {"id": pid, **data}
-
-
-@app.post("/api/patients/login")
-def patient_login(req: PatientLoginRequest):
-    row = _fetchone(
-        "SELECT * FROM patients WHERE email = %s AND password = %s",
-        (req.email, req.password),
-    )
-    if not row:
-        raise HTTPException(401, "Invalid email or password")
-    row.pop("password", None)
-    return row
+    return {"id": pid, **patient.model_dump()}
 
 
 @app.get("/api/patients/{patient_id}")

@@ -47,7 +47,6 @@ def init_db():
             gender     VARCHAR(20)  NOT NULL,
             email      VARCHAR(255),
             phone      VARCHAR(50),
-            password   VARCHAR(255) NOT NULL DEFAULT '',
             created_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
         )
     """)
@@ -90,22 +89,6 @@ def init_db():
         )
     """)
 
-    conn.commit()
-
-    # ── Migrations (safe to re-run) ──────────────────────────────────────
-    # Add password column to patients if it doesn't exist yet (for existing DBs)
-    cursor = conn.cursor()
-    cursor.execute("""
-        DO $$
-        BEGIN
-            IF NOT EXISTS (
-                SELECT 1 FROM information_schema.columns
-                WHERE table_name = 'patients' AND column_name = 'password'
-            ) THEN
-                ALTER TABLE patients ADD COLUMN password VARCHAR(255) NOT NULL DEFAULT '';
-            END IF;
-        END $$;
-    """)
     conn.commit()
     cursor.close()
     conn.close()
