@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, type DiagnosisRecord } from '../api';
+import NotificationBell from '../components/NotificationBell';
 
 export default function DiagnosisHistory() {
   const navigate = useNavigate();
@@ -39,6 +40,7 @@ export default function DiagnosisHistory() {
               <span className="material-symbols-outlined text-primary group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
               <span className="ml-1 font-semibold text-primary">Back</span>
             </button>
+            <NotificationBell patientId={patient.id} />
             <button onClick={() => { sessionStorage.removeItem('patient'); navigate('/patient/login'); }} className="flex items-center justify-center p-2 px-4 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm font-bold hover:bg-red-100 transition-colors gap-1">
               <span className="material-symbols-outlined text-sm">logout</span>
               Logout

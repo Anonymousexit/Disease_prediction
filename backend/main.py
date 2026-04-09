@@ -318,7 +318,7 @@ def get_referral(referral_id: int):
 @app.put("/api/referrals/{referral_id}")
 def update_referral(referral_id: int, body: ReferralUpdate):
     conn = get_db()
-    cur = conn.cursor()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     updates, values = ["updated_at = CURRENT_TIMESTAMP"], []
     if body.status is not None:
         updates.append("status = %s")
@@ -329,9 +329,66 @@ def update_referral(referral_id: int, body: ReferralUpdate):
     values.append(referral_id)
     cur.execute(f"UPDATE referrals SET {', '.join(updates)} WHERE id = %s", values)
     conn.commit()
+
+    # ── Auto-create notification for the patient ──────────────────────
+    if body.doctor_notes:
+        cur.execute("""
+            SELECT r.patient_id, r.doctor_id, d.predicted_disease,
+                   doc.name AS doctor_name
+            FROM referrals r
+            JOIN diagnoses d ON r.diagnosis_id = d.id
+            LEFT JOIN doctors doc ON r.doctor_id = doc.id
+            WHERE r.id = %s
+        """, (referral_id,))
+        ref_row = cur.fetchone()
+        if ref_row:
+            status_label = body.status or "Pending"
+            message = f"Dr. {ref_row['doctor_name'] or 'Unknown'} has reviewed your referral for {ref_row['predicted_disease']} and left a clinical note. Status: {status_label}."
+            cur.execute(
+                """INSERT INTO notifications
+                   (patient_id, referral_id, doctor_name, disease, message)
+                   VALUES (%s, %s, %s, %s, %s)""",
+                (ref_row['patient_id'], referral_id,
+                 ref_row['doctor_name'], ref_row['predicted_disease'], message),
+            )
+            conn.commit()
+
     cur.close()
     conn.close()
     return {"message": "Referral updated"}
+
+
+# ── Patient notification endpoints ────────────────────────────────────
+
+@app.get("/api/patients/{patient_id}/notifications")
+def get_patient_notifications(patient_id: int):
+    """Return all notifications for a patient, newest first."""
+    return _fetchall(
+        "SELECT * FROM notifications WHERE patient_id = %s ORDER BY created_at DESC",
+        (patient_id,),
+    )
+
+
+@app.put("/api/notifications/{notification_id}/read")
+def mark_notification_read(notification_id: int):
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("UPDATE notifications SET is_read = TRUE WHERE id = %s", (notification_id,))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return {"message": "Notification marked as read"}
+
+
+@app.put("/api/patients/{patient_id}/notifications/read-all")
+def mark_all_notifications_read(patient_id: int):
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("UPDATE notifications SET is_read = TRUE WHERE patient_id = %s AND is_read = FALSE", (patient_id,))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return {"message": "All notifications marked as read"}
 
 
 # ── Dashboard stats ───────────────────────────────────────────────────

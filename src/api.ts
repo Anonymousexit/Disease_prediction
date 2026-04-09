@@ -111,6 +111,17 @@ export interface Stats {
   completed: number;
 }
 
+export interface Notification {
+  id: number;
+  patient_id: number;
+  referral_id: number;
+  doctor_name: string;
+  disease: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+}
+
 // ── API methods ──────────────────────────────────────────────────────
 
 export const api = {
@@ -149,4 +160,9 @@ export const api = {
 
   // Stats
   getStats: ()                          => get<Stats>('/stats'),
+
+  // Notifications
+  getNotifications: (patientId: number) => get<Notification[]>(`/patients/${patientId}/notifications`),
+  markNotificationRead: (id: number) => put(`/notifications/${id}/read`, {}),
+  markAllNotificationsRead: (patientId: number) => put(`/patients/${patientId}/notifications/read-all`, {}),
 };

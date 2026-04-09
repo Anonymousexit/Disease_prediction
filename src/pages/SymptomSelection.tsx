@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, type Symptom } from '../api';
+import NotificationBell from '../components/NotificationBell';
 
 export default function SymptomSelection() {
   const navigate = useNavigate();
@@ -60,7 +61,7 @@ export default function SymptomSelection() {
           </div>
           <h2 className="text-slate-900 dark:text-white text-xl font-bold leading-tight tracking-tight">MediDiag</h2>
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4">
           <div className="hidden sm:flex items-center gap-3">
             <div className="text-right">
               <p className="text-xs text-slate-500 uppercase font-semibold">Patient</p>
@@ -72,6 +73,7 @@ export default function SymptomSelection() {
               </div>
             </div>
           </div>
+          <NotificationBell patientId={patient.id} />
           <button onClick={() => navigate('/history')} className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 border border-primary text-primary text-sm font-bold hover:bg-primary/5 transition-colors">
             <span className="truncate">View History</span>
           </button>

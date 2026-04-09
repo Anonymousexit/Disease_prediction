@@ -17,66 +17,42 @@ export default function DoctorDashboard() {
   }, []);
 
   return (
-    <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display flex min-h-screen">
-      <aside className="w-72 bg-primary text-white flex flex-col fixed h-full shadow-xl">
-        <div className="p-6 flex items-center gap-3 border-b border-primary/20">
-          <div className="bg-white p-1.5 rounded-lg">
-            <span className="material-symbols-outlined text-primary text-2xl">medical_services</span>
+    <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col">
+      {/* ── Top Header Bar ── */}
+      <header className="h-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark/50 flex items-center justify-between px-6 md:px-8 sticky top-0 z-10 backdrop-blur-sm">
+        <div className="flex items-center gap-3">
+          <div className="bg-primary p-1.5 rounded-lg">
+            <span className="material-symbols-outlined text-white text-xl">medical_services</span>
           </div>
-          <h2 className="text-xl font-bold tracking-tight">MediDiag</h2>
+          <h2 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">MediDiag</h2>
+          <span className="hidden sm:inline-block text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Doctor Portal</span>
         </div>
-        <div className="p-6 flex flex-col gap-1">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="size-12 rounded-full border-2 border-white/20 bg-cover bg-center" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDfNxui4YKxZe-uylfei2Mj50_I6xdgVT_eeEZgMnphmmZ1WXgBG8OTzUk1ZSAxuG8ZgiDSTdSb5TBcWSNa6jGBp26AIx0QphOIID9HWxRvmM-eLPMg0cxXk9Jm6z-NySZAzAOFsdLbAxOeY93qWKt5elMRD9e97NYebtNmOHsXcqlKp_Y9j06e2M0n0GPI8JQL66yD7Mk4Z6IqDTmgMytjS89G4pCO4FUa3A44ex7oHof0euqf2iPR_ysSHIo4SW97iA9v1ux4eHeL')" }}></div>
-            <div>
-              <p className="font-bold text-sm leading-tight">{doctor.name || 'Doctor'}</p>
-              <p className="text-primary/70 text-xs font-medium text-white/80">{doctor.specialization || 'MediDiag'}</p>
+
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-3 mr-2">
+            <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+              {(doctor.name || 'D')[0]}
+            </div>
+            <div className="text-right">
+              <p className="text-sm font-bold text-slate-900 dark:text-white leading-tight">{doctor.name || 'Doctor'}</p>
+              <p className="text-[10px] text-slate-500 font-medium">{doctor.specialization || 'General Practice'}</p>
             </div>
           </div>
-          <nav className="flex flex-col gap-2">
-            <a className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/10 text-white font-medium" href="#">
-              <span className="material-symbols-outlined">dashboard</span>
-              <span>Dashboard</span>
-            </a>
-            <a className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white/80 font-medium" href="#">
-              <span className="material-symbols-outlined">group</span>
-              <span>My Referrals</span>
-            </a>
-            <a className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white/80 font-medium" href="#">
-              <span className="material-symbols-outlined">folder_shared</span>
-              <span>Patient Records</span>
-            </a>
-          </nav>
-        </div>
-        <div className="mt-auto p-6 flex flex-col gap-2">
-          <button onClick={() => navigate('/')} className="flex w-full items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white/80 font-medium">
-            <span className="material-symbols-outlined">person</span>
-            <span>Patient Portal</span>
+          <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block" />
+          <button onClick={() => navigate('/')} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold text-primary hover:bg-primary/5 transition-colors">
+            <span className="material-symbols-outlined text-lg">person</span>
+            <span className="hidden md:inline">Patient Portal</span>
           </button>
-          <button onClick={() => navigate('/doctor')} className="flex w-full items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-white/80 font-medium">
-            <span className="material-symbols-outlined">logout</span>
-            <span>Sign Out</span>
+          <button onClick={() => { sessionStorage.removeItem('doctor'); navigate('/doctor'); }} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors">
+            <span className="material-symbols-outlined text-lg">logout</span>
+            <span className="hidden md:inline">Sign Out</span>
           </button>
         </div>
-      </aside>
+      </header>
 
-      <main className="flex-1 ml-72">
-        <header className="h-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark/50 flex items-center justify-between px-8 sticky top-0 z-10 backdrop-blur-sm">
-          <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg px-3 py-1.5 w-96">
-            <span className="material-symbols-outlined text-slate-400 text-xl">search</span>
-            <input className="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-slate-400 outline-none" placeholder="Search patients or diagnosis..." type="text" />
-          </div>
-          <div className="flex items-center gap-4">
-            <button className="size-10 flex items-center justify-center rounded-full hover:bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-              <span className="material-symbols-outlined">notifications</span>
-            </button>
-            <button className="size-10 flex items-center justify-center rounded-full hover:bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-              <span className="material-symbols-outlined">settings</span>
-            </button>
-          </div>
-        </header>
-
-        <div className="p-8 max-w-6xl mx-auto">
+      {/* ── Main Content ── */}
+      <main className="flex-1">
+        <div className="p-6 md:p-8 max-w-6xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Welcome, {doctor.name?.split(' ')[0] || 'Doctor'}</h1>
             <p className="text-slate-500 dark:text-slate-400 font-medium mt-1">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
@@ -121,7 +97,6 @@ export default function DoctorDashboard() {
           <section>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-slate-900 dark:text-white">Recent Referrals</h2>
-              <button className="text-primary font-semibold text-sm hover:underline">View all</button>
             </div>
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
               <table className="w-full text-left border-collapse">

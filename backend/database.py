@@ -90,6 +90,19 @@ def init_db():
         )
     """)
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS notifications (
+            id          SERIAL PRIMARY KEY,
+            patient_id  INT          NOT NULL REFERENCES patients(id),
+            referral_id INT          NOT NULL REFERENCES referrals(id),
+            doctor_name VARCHAR(255),
+            disease     VARCHAR(255),
+            message     TEXT         NOT NULL,
+            is_read     BOOLEAN      DEFAULT FALSE,
+            created_at  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
     conn.commit()
 
     # ── Migrations (safe to re-run) ──────────────────────────────────────

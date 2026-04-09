@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { api, type Doctor, type DiagnosisResult as DiagResult } from '../api';
+import NotificationBell from '../components/NotificationBell';
 
 export default function DiagnosisResult() {
   const location = useLocation();
@@ -70,7 +71,7 @@ export default function DiagnosisResult() {
               </div>
               <h2 className="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-tight">MediDiag</h2>
             </div>
-            <div className="flex flex-1 justify-end gap-4 items-center">
+            <div className="flex flex-1 justify-end gap-3 items-center">
               <div className="hidden md:flex flex-col items-end mr-2">
                 <p className="text-slate-900 dark:text-white text-sm font-bold">{patient.full_name || 'Patient'}</p>
                 <p className="text-slate-500 dark:text-slate-400 text-xs">Patient ID: #{patient.id || '—'}</p>
@@ -78,6 +79,7 @@ export default function DiagnosisResult() {
               <div className="bg-primary/10 rounded-full size-10 flex items-center justify-center border border-primary/20 text-primary font-bold text-lg">
                 {(patient.full_name || 'P')[0]}
               </div>
+              <NotificationBell patientId={patient.id} />
               <button onClick={() => { sessionStorage.removeItem('patient'); navigate('/patient/login'); }} className="flex items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-red-50 border border-red-200 text-red-600 text-sm font-bold hover:bg-red-100 transition-colors gap-1">
                 <span className="material-symbols-outlined text-sm">logout</span>
                 <span className="hidden sm:inline">Logout</span>
