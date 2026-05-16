@@ -11,6 +11,11 @@ import psycopg2
 import psycopg2.extras
 import json
 import os
+import re
+import google.generativeai as genai
+from dotenv import load_dotenv
+
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 from database import init_db, get_db
 from ml_service import MLService
@@ -48,6 +53,10 @@ class PatientCreate(BaseModel):
     email: Optional[str] = None
     phone: Optional[str] = None
     password: str
+
+
+class ExtractSymptomsRequest(BaseModel):
+    text: str
 
 
 class DiagnoseRequest(BaseModel):
@@ -114,6 +123,64 @@ def get_symptoms():
     return [
         {"key": s, "label": ml_service.format_symptom_name(s)}
         for s in symptoms
+    ]
+
+
+@app.post("/api/extract-symptoms")
+def extract_symptoms(req: ExtractSymptomsRequest):
+    """Use Gemini to extract symptom keys from free-text patient description."""
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise HTTPException(500, "Gemini API key is not configured on the server.")
+
+    # Build the list of valid symptom names for the prompt
+    symptom_columns = ml_service.get_symptoms()
+    symptom_labels = {
+        ml_service.format_symptom_name(s).lower(): s for s in symptom_columns
+    }
+    symptom_list_str = ", ".join(
+        ml_service.format_symptom_name(s) for s in symptom_columns
+    )
+
+    prompt = (
+        "You are a medical symptom extraction assistant. "
+        "A patient has described how they feel in their own words. "
+        "Your job is to identify which symptoms from the following list match their description.\n\n"
+        f"VALID SYMPTOMS: {symptom_list_str}\n\n"
+        f"PATIENT DESCRIPTION: \"{req.text}\"\n\n"
+        "Instructions:\n"
+        "- Return ONLY symptom names from the VALID SYMPTOMS list above.\n"
+        "- Return one symptom per line, exactly as it appears in the list.\n"
+        "- If a patient describes something that closely matches a symptom, include it.\n"
+        "- Do NOT invent symptoms not in the list.\n"
+        "- Do NOT include any explanation, numbering, or extra text.\n"
+        "- If no symptoms match, return the single word: NONE"
+    )
+
+    try:
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel("gemini-2.0-flash")
+        response = model.generate_content(prompt)
+        raw_text = response.text.strip()
+    except Exception as e:
+        raise HTTPException(502, f"Gemini API error: {str(e)}")
+
+    if raw_text.upper() == "NONE":
+        return []
+
+    # Parse Gemini response — match each line to a valid symptom
+    matched_keys = []
+    seen = set()
+    for line in raw_text.split("\n"):
+        cleaned = line.strip().strip("- ").strip("•").strip("*").strip().lower()
+        cleaned = re.sub(r"^\d+\.?\s*", "", cleaned).strip()  # remove numbering
+        if cleaned in symptom_labels and cleaned not in seen:
+            matched_keys.append(symptom_labels[cleaned])
+            seen.add(cleaned)
+
+    return [
+        {"key": k, "label": ml_service.format_symptom_name(k)}
+        for k in matched_keys
     ]
 
 

@@ -90,6 +90,15 @@ export default function SymptomSelection() {
             <div className="mb-8">
               <h1 className="text-slate-900 dark:text-white text-3xl font-extrabold leading-tight tracking-tight mb-2">Select Your Symptoms</h1>
               <p className="text-slate-500 dark:text-slate-400 text-lg">Search and click all symptoms you are currently experiencing.</p>
+              <div className="flex justify-center mt-4">
+                <button
+                  onClick={() => navigate('/describe')}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-primary text-primary text-sm font-bold hover:bg-primary/5 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-lg">edit_note</span>
+                  Describe symptoms in your own words
+                </button>
+              </div>
             </div>
 
             {error && (

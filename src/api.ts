@@ -127,6 +127,7 @@ export interface Notification {
 export const api = {
   // Symptoms
   getSymptoms: ()                       => get<Symptom[]>('/symptoms'),
+  extractSymptoms: (text: string)       => post<Symptom[]>('/extract-symptoms', { text }),
 
   // Patients
   createPatient: (data: Omit<Patient, 'id'> & { password: string }) => post<Patient>('/patients', data),

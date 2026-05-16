@@ -16,7 +16,7 @@ export default function PatientLogin() {
     try {
       const patient = await api.loginPatient(email, password);
       sessionStorage.setItem('patient', JSON.stringify(patient));
-      navigate('/symptoms');
+      navigate('/describe');
     } catch (err: any) {
       setError('Invalid email or password. Please try again.');
     } finally {

@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import PatientLogin from './pages/PatientLogin';
 import PatientRegistration from './pages/PatientRegistration';
 import SymptomSelection from './pages/SymptomSelection';
+import DescribeSymptoms from './pages/DescribeSymptoms';
 import DiagnosisResult from './pages/DiagnosisResult';
 import DiagnosisHistory from './pages/DiagnosisHistory';
 import DoctorLogin from './pages/DoctorLogin';
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="/" element={<PatientLogin />} />
         <Route path="/patient/login" element={<PatientLogin />} />
         <Route path="/patient/register" element={<PatientRegistration />} />
+        <Route path="/describe" element={<DescribeSymptoms />} />
         <Route path="/symptoms" element={<SymptomSelection />} />
         <Route path="/diagnosis" element={<DiagnosisResult />} />
         <Route path="/history" element={<DiagnosisHistory />} />
