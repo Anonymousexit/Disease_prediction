@@ -159,7 +159,7 @@ def extract_symptoms(req: ExtractSymptomsRequest):
 
     try:
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel("gemini-2.5-flash")
+        model = genai.GenerativeModel("gemini-3.5-flash")
         response = model.generate_content(prompt)
         raw_text = response.text.strip()
     except Exception as e:
