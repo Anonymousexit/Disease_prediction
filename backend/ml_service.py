@@ -65,6 +65,9 @@ class MLService:
     # ------------------------------------------------------------------
     # Prediction
     # ------------------------------------------------------------------
+    # Classes to exclude from predictions (synthetic training classes)
+    _EXCLUDED_CLASSES = {"Unknown"}
+
     def predict(self, selected_symptoms: list[str]) -> dict:
         """Run the trained model on a binary symptom vector.
 
@@ -82,19 +85,33 @@ class MLService:
 
         input_df = pd.DataFrame([input_vector], columns=self.symptom_columns)
 
-        # Predict
-        prediction = self.model.predict(input_df)[0]
+        # Predict — get raw probabilities from the model
         probabilities = self.model.predict_proba(input_df)[0]
 
-        # Decode label
-        disease_name = self.label_encoder.inverse_transform([prediction])[0]
-
-        # Build probability map (sorted descending)
-        all_probs = {}
+        # Build the full probability map (including synthetic classes)
+        raw_probs = {}
         for i, cls in enumerate(self.label_encoder.classes_):
-            all_probs[cls] = round(float(probabilities[i]) * 100, 1)
+            raw_probs[cls] = float(probabilities[i])
+
+        # Filter out excluded classes (e.g. "Unknown") and keep only real diseases
+        real_probs = {cls: prob for cls, prob in raw_probs.items()
+                      if cls not in self._EXCLUDED_CLASSES}
+
+        # Re-normalise so real-disease probabilities sum to 100%
+        total = sum(real_probs.values())
+        if total > 0:
+            all_probs = {cls: round((prob / total) * 100, 1)
+                         for cls, prob in real_probs.items()}
+        else:
+            # Fallback: equal probability across all real diseases
+            n = len(real_probs)
+            all_probs = {cls: round(100 / n, 1) for cls in real_probs}
+
+        # Sort descending by probability
         all_probs = dict(sorted(all_probs.items(), key=lambda x: x[1], reverse=True))
 
+        # The top prediction is always a real disease
+        disease_name = next(iter(all_probs))
         confidence = all_probs[disease_name]
 
         # Medicine recommendation
