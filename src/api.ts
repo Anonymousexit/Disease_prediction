@@ -155,6 +155,7 @@ export const api = {
     post('/referrals', data),
 
   getReferrals:   ()                    => get<Referral[]>('/referrals'),
+  getPatientReferrals: (patientId: number) => get<Referral[]>(`/patients/${patientId}/referrals`),
   getReferral:    (id: number)          => get<Referral>(`/referrals/${id}`),
   updateReferral: (id: number, data: { status?: string; doctor_notes?: string }) =>
     put(`/referrals/${id}`, data),

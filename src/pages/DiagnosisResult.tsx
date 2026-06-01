@@ -6,7 +6,15 @@ import NotificationBell from '../components/NotificationBell';
 export default function DiagnosisResult() {
   const location = useLocation();
   const navigate = useNavigate();
-  const result: DiagResult | null = location.state?.result || null;
+  const stateResult: DiagResult | null = location.state?.result || null;
+  const [result] = useState<DiagResult | null>(() => {
+    if (stateResult) {
+      sessionStorage.setItem('lastDiagnosis', JSON.stringify(stateResult));
+      return stateResult;
+    }
+    const saved = sessionStorage.getItem('lastDiagnosis');
+    return saved ? JSON.parse(saved) : null;
+  });
   const patient = JSON.parse(sessionStorage.getItem('patient') || '{}');
 
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -50,7 +58,7 @@ export default function DiagnosisResult() {
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-4">No Diagnosis Data</h2>
           <p className="text-slate-500 mb-6">Please start a diagnosis from the symptom selection page.</p>
-          <button onClick={() => navigate('/symptoms')} className="px-6 py-3 bg-primary text-white rounded-lg font-bold">
+          <button onClick={() => navigate('/describe')} className="px-6 py-3 bg-primary text-white rounded-lg font-bold">
             Go to Symptoms
           </button>
         </div>
@@ -269,7 +277,7 @@ export default function DiagnosisResult() {
               )}
 
               <div className="flex justify-center pt-8 pb-12">
-                <button onClick={() => navigate('/symptoms')} className="flex items-center gap-2 px-6 py-3 rounded-lg border-2 border-primary text-primary font-bold hover:bg-primary/5 transition-colors">
+                <button onClick={() => navigate('/describe')} className="flex items-center gap-2 px-6 py-3 rounded-lg border-2 border-primary text-primary font-bold hover:bg-primary/5 transition-colors">
                   <span className="material-symbols-outlined">arrow_back</span>
                   Start New Diagnosis
                 </button>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
 
@@ -8,6 +8,16 @@ export default function DoctorLogin() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
+  useEffect(() => {
+    const remembered = localStorage.getItem('doctor');
+    if (remembered) {
+      sessionStorage.setItem('doctor', remembered);
+      navigate('/doctor/dashboard');
+    }
+  }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,6 +26,11 @@ export default function DoctorLogin() {
     try {
       const doctor = await api.loginDoctor(email, password);
       sessionStorage.setItem('doctor', JSON.stringify(doctor));
+      if (rememberMe) {
+        localStorage.setItem('doctor', JSON.stringify(doctor));
+      } else {
+        localStorage.removeItem('doctor');
+      }
       navigate('/doctor/dashboard');
     } catch (err: any) {
       setError('Invalid email or password. Please try again.');
@@ -68,15 +83,15 @@ export default function DoctorLogin() {
                 <a className="text-primary text-xs font-semibold hover:underline" href="#">Forgot Password?</a>
               </div>
               <div className="relative flex items-center">
-                <input required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/20 focus:border-primary h-12 pl-4 pr-12 transition-all" placeholder="••••••••" type="password" />
-                <button className="absolute right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center" type="button">
-                  <span className="material-symbols-outlined">visibility</span>
+                <input required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/20 focus:border-primary h-12 pl-4 pr-12 transition-all" placeholder="••••••••" type={showPassword ? 'text' : 'password'} />
+                <button className="absolute right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center" type="button" onClick={() => setShowPassword(!showPassword)}>
+                  <span className="material-symbols-outlined">{showPassword ? 'visibility_off' : 'visibility'}</span>
                 </button>
               </div>
             </div>
 
             <div className="flex items-center gap-2 px-1">
-              <input className="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4" id="remember" type="checkbox" />
+              <input className="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4" id="remember" type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />
               <label className="text-slate-600 dark:text-slate-400 text-sm" htmlFor="remember">Keep me logged in for 24 hours</label>
             </div>
 

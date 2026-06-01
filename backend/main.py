@@ -277,6 +277,30 @@ def get_patient_history(patient_id: int):
     return rows
 
 
+@app.get("/api/patients/{patient_id}/referrals")
+def get_patient_referrals(patient_id: int):
+    """Return all referrals for a specific patient, with full joined data."""
+    rows = _fetchall("""
+        SELECT r.*, d.predicted_disease, d.confidence, d.symptoms,
+               d.probabilities, d.medicine,
+               p.full_name AS patient_name, p.age AS patient_age,
+               p.gender AS patient_gender,
+               doc.name AS doctor_name, doc.specialization AS doctor_specialization
+        FROM referrals r
+        JOIN diagnoses d  ON r.diagnosis_id = d.id
+        JOIN patients  p  ON r.patient_id   = p.id
+        LEFT JOIN doctors doc ON r.doctor_id = doc.id
+        WHERE r.patient_id = %s
+        ORDER BY r.created_at DESC
+    """, (patient_id,))
+    for d in rows:
+        if isinstance(d["symptoms"], str):
+            d["symptoms"] = json.loads(d["symptoms"])
+        if isinstance(d["probabilities"], str):
+            d["probabilities"] = json.loads(d["probabilities"])
+    return rows
+
+
 # ── Doctor endpoints ──────────────────────────────────────────────────
 
 @app.post("/api/doctors/register")

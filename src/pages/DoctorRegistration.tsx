@@ -11,6 +11,8 @@ export default function DoctorRegistration() {
   const [specialization, setSpecialization] = useState('General Practice');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,27 +119,37 @@ export default function DoctorRegistration() {
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
                 <label className="text-slate-700 dark:text-slate-300 text-sm font-semibold px-1">Password</label>
-                <input
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/20 focus:border-primary h-12 px-4 transition-all"
-                  placeholder="••••••••"
-                  type="password"
-                  minLength={6}
-                />
+                <div className="relative">
+                  <input
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/20 focus:border-primary h-12 pl-4 pr-12 transition-all"
+                    placeholder="••••••••"
+                    type={showPassword ? 'text' : 'password'}
+                    minLength={6}
+                  />
+                  <button className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center" type="button" onClick={() => setShowPassword(!showPassword)}>
+                    <span className="material-symbols-outlined text-xl">{showPassword ? 'visibility_off' : 'visibility'}</span>
+                  </button>
+                </div>
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-slate-700 dark:text-slate-300 text-sm font-semibold px-1">Confirm Password</label>
-                <input
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/20 focus:border-primary h-12 px-4 transition-all"
-                  placeholder="••••••••"
-                  type="password"
-                  minLength={6}
-                />
+                <div className="relative">
+                  <input
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/20 focus:border-primary h-12 pl-4 pr-12 transition-all"
+                    placeholder="••••••••"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    minLength={6}
+                  />
+                  <button className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center" type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                    <span className="material-symbols-outlined text-xl">{showConfirmPassword ? 'visibility_off' : 'visibility'}</span>
+                  </button>
+                </div>
               </div>
             </div>
 

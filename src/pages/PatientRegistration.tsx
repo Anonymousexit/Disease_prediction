@@ -14,6 +14,8 @@ export default function PatientRegistration() {
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +43,7 @@ export default function PatientRegistration() {
         password,
       } as any);
       sessionStorage.setItem('patient', JSON.stringify(patient));
-      navigate('/symptoms');
+      navigate('/describe');
     } catch (err: any) {
       if (err.message?.includes('409')) {
         setError('A patient with this email already exists.');
@@ -138,11 +140,21 @@ export default function PatientRegistration() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="flex flex-col gap-2">
                   <label className="text-slate-700 dark:text-slate-200 text-sm font-semibold">Password</label>
-                  <input required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="••••••••" type="password" minLength={6} />
+                  <div className="relative">
+                    <input required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 pr-12 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="••••••••" type={showPassword ? 'text' : 'password'} minLength={6} />
+                    <button className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center" type="button" onClick={() => setShowPassword(!showPassword)}>
+                      <span className="material-symbols-outlined">{showPassword ? 'visibility_off' : 'visibility'}</span>
+                    </button>
+                  </div>
                 </div>
                 <div className="flex flex-col gap-2">
                   <label className="text-slate-700 dark:text-slate-200 text-sm font-semibold">Confirm Password</label>
-                  <input required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="••••••••" type="password" minLength={6} />
+                  <div className="relative">
+                    <input required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full px-4 pr-12 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="••••••••" type={showConfirmPassword ? 'text' : 'password'} minLength={6} />
+                    <button className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center" type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                      <span className="material-symbols-outlined">{showConfirmPassword ? 'visibility_off' : 'visibility'}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
