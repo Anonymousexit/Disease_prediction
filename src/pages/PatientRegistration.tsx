@@ -70,7 +70,7 @@ export default function PatientRegistration() {
           <div className="hidden md:flex items-center gap-4">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-primary text-lg">psychology</span>
-              <p className="text-slate-600 dark:text-slate-300 text-sm font-medium">Disease Diagnosis using Support Vector Machine Algorithm </p>
+              <p className="text-slate-600 dark:text-slate-300 text-sm font-medium">Disease Diagnosis using Naive Bayes Algorithm </p>
             </div>
             <div className="w-px h-6 bg-slate-200 dark:bg-slate-700"></div>
             <button
