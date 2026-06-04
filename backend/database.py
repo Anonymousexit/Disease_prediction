@@ -27,6 +27,9 @@ def get_db():
     if DATABASE_URL:
         # Render's DATABASE_URL uses 'postgres://' — psycopg2 requires 'postgresql://'
         url = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+        # Render requires SSL for external connections
+        if "sslmode=" not in url:
+            url += ("&" if "?" in url else "?") + "sslmode=require"
         return psycopg2.connect(url)
     return psycopg2.connect(
         host=_host, port=_port, user=_user,
