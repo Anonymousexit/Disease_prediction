@@ -122,6 +122,16 @@ export interface Notification {
   created_at: string;
 }
 
+export interface Message {
+  id: number;
+  referral_id: number;
+  sender_type: 'patient' | 'doctor';
+  sender_id: number;
+  content: string;
+  is_read: boolean;
+  created_at: string;
+}
+
 // ── API methods ──────────────────────────────────────────────────────
 
 export const api = {
@@ -167,4 +177,13 @@ export const api = {
   getNotifications: (patientId: number) => get<Notification[]>(`/patients/${patientId}/notifications`),
   markNotificationRead: (id: number) => put(`/notifications/${id}/read`, {}),
   markAllNotificationsRead: (patientId: number) => put(`/patients/${patientId}/notifications/read-all`, {}),
+
+  // Chat / Messages
+  getMessages: (referralId: number) => get<Message[]>(`/referrals/${referralId}/messages`),
+  sendMessage: (referralId: number, data: { sender_type: string; sender_id: number; content: string }) =>
+    post<Message>(`/referrals/${referralId}/messages`, data),
+  markMessagesRead: (referralId: number, readerType: string) =>
+    put(`/referrals/${referralId}/messages/read`, { reader_type: readerType }),
+  getUnreadCounts: (referralIds: number[], readerType: string) =>
+    post<Record<string, number>>('/messages/unread-counts', { referral_ids: referralIds, reader_type: readerType }),
 };

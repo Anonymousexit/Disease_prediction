@@ -106,6 +106,18 @@ def init_db():
         )
     """)
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS messages (
+            id SERIAL PRIMARY KEY,
+            referral_id INT NOT NULL REFERENCES referrals(id),
+            sender_type VARCHAR(10) NOT NULL,
+            sender_id INT NOT NULL,
+            content TEXT NOT NULL,
+            is_read BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
     conn.commit()
 
     # ── Migrations (safe to re-run) ──────────────────────────────────────

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, type Symptom } from '../api';
 import NotificationBell from '../components/NotificationBell';
+import ThemeToggle from '../components/ThemeToggle';
 
 export default function DescribeSymptoms() {
   const navigate = useNavigate();
@@ -81,6 +82,7 @@ export default function DescribeSymptoms() {
               </div>
             </div>
           </div>
+          <ThemeToggle />
           <NotificationBell patientId={patient.id} />
           <button
             onClick={() => navigate('/history')}

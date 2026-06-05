@@ -92,6 +92,21 @@ class ReferralUpdate(BaseModel):
     doctor_notes: Optional[str] = None
 
 
+class MessageCreate(BaseModel):
+    sender_type: str
+    sender_id: int
+    content: str
+
+
+class MarkMessagesRead(BaseModel):
+    reader_type: str
+
+
+class UnreadCountsRequest(BaseModel):
+    referral_ids: list[int]
+    reader_type: str
+
+
 # ── Helpers ───────────────────────────────────────────────────────────
 
 def _fetchall(query: str, params: tuple = ()) -> list[dict]:
@@ -447,6 +462,76 @@ def update_referral(referral_id: int, body: ReferralUpdate):
     cur.close()
     conn.close()
     return {"message": "Referral updated"}
+
+
+# ── Chat / Messaging endpoints ────────────────────────────────────────
+
+@app.get("/api/referrals/{referral_id}/messages")
+def get_messages(referral_id: int):
+    """Return all messages for a referral, ordered chronologically."""
+    return _fetchall(
+        "SELECT * FROM messages WHERE referral_id = %s ORDER BY created_at ASC",
+        (referral_id,),
+    )
+
+
+@app.post("/api/referrals/{referral_id}/messages")
+def send_message(referral_id: int, msg: MessageCreate):
+    """Send a new chat message on a referral."""
+    # Verify referral exists
+    ref = _fetchone("SELECT id FROM referrals WHERE id = %s", (referral_id,))
+    if not ref:
+        raise HTTPException(404, "Referral not found")
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(
+        """INSERT INTO messages (referral_id, sender_type, sender_id, content)
+           VALUES (%s, %s, %s, %s) RETURNING id, created_at""",
+        (referral_id, msg.sender_type, msg.sender_id, msg.content),
+    )
+    row = cur.fetchone()
+    conn.commit()
+    cur.close()
+    conn.close()
+    return {"id": row[0], "referral_id": referral_id, "sender_type": msg.sender_type,
+            "sender_id": msg.sender_id, "content": msg.content,
+            "is_read": False, "created_at": str(row[1])}
+
+
+@app.put("/api/referrals/{referral_id}/messages/read")
+def mark_messages_read(referral_id: int, body: MarkMessagesRead):
+    """Mark all messages from the OTHER party as read."""
+    other_type = 'doctor' if body.reader_type == 'patient' else 'patient'
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(
+        """UPDATE messages SET is_read = TRUE
+           WHERE referral_id = %s AND sender_type = %s AND is_read = FALSE""",
+        (referral_id, other_type),
+    )
+    conn.commit()
+    cur.close()
+    conn.close()
+    return {"message": "Messages marked as read"}
+
+
+@app.post("/api/messages/unread-counts")
+def get_unread_counts(body: UnreadCountsRequest):
+    """Return unread message counts for multiple referrals at once."""
+    if not body.referral_ids:
+        return {}
+    other_type = 'doctor' if body.reader_type == 'patient' else 'patient'
+    placeholders = ','.join(['%s'] * len(body.referral_ids))
+    rows = _fetchall(
+        f"""SELECT referral_id, COUNT(*) AS count
+            FROM messages
+            WHERE referral_id IN ({placeholders})
+              AND sender_type = %s
+              AND is_read = FALSE
+            GROUP BY referral_id""",
+        (*body.referral_ids, other_type),
+    )
+    return {str(r['referral_id']): r['count'] for r in rows}
 
 
 # ── Patient notification endpoints ────────────────────────────────────

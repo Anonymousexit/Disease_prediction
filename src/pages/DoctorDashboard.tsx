@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, type Referral, type Stats } from '../api';
+import ThemeToggle from '../components/ThemeToggle';
+import ChatPanel from '../components/ChatPanel';
+import { AnimatePresence } from 'motion/react';
 
 export default function DoctorDashboard() {
   const navigate = useNavigate();
@@ -8,6 +11,9 @@ export default function DoctorDashboard() {
   const [stats, setStats] = useState<Stats>({ total: 0, pending: 0, completed: 0 });
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(true);
+  const [chatOpen, setChatOpen] = useState<number | null>(null);
+  const [chatPartner, setChatPartner] = useState({ name: '', disease: '' });
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     Promise.all([api.getStats(), api.getReferrals()])
@@ -15,6 +21,14 @@ export default function DoctorDashboard() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (referrals.length > 0 && doctor.id) {
+      api.getUnreadCounts(referrals.map(r => r.id), 'doctor')
+        .then(setUnreadCounts)
+        .catch(() => {});
+    }
+  }, [referrals]);
 
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col">
@@ -38,6 +52,7 @@ export default function DoctorDashboard() {
               <p className="text-[10px] text-slate-500 font-medium">{doctor.specialization || 'General Practice'}</p>
             </div>
           </div>
+          <ThemeToggle />
           <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block" />
           <button onClick={() => navigate('/')} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold text-primary hover:bg-primary/5 transition-colors">
             <span className="material-symbols-outlined text-lg">person</span>
@@ -106,14 +121,15 @@ export default function DoctorDashboard() {
                     <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Disease / Condition</th>
                     <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Confidence</th>
                     <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Chat</th>
                     <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                   {loading ? (
-                    <tr><td colSpan={5} className="px-6 py-8 text-center text-slate-400">Loading referrals...</td></tr>
+                    <tr><td colSpan={6} className="px-6 py-8 text-center text-slate-400">Loading referrals...</td></tr>
                   ) : referrals.length === 0 ? (
-                    <tr><td colSpan={5} className="px-6 py-8 text-center text-slate-400">No referrals yet.</td></tr>
+                    <tr><td colSpan={6} className="px-6 py-8 text-center text-slate-400">No referrals yet.</td></tr>
                   ) : (
                     referrals.map(ref => (
                     <tr key={ref.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
@@ -137,6 +153,20 @@ export default function DoctorDashboard() {
                       <td className="px-6 py-4">
                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${ref.status === 'Pending' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}`}>{ref.status}</span>
                       </td>
+                      <td className="px-6 py-4">
+                        <button
+                          onClick={() => { setChatOpen(ref.id); setChatPartner({ name: ref.patient_name, disease: ref.predicted_disease }); }}
+                          className="relative size-9 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary flex items-center justify-center transition-colors"
+                          title="Chat with patient"
+                        >
+                          <span className="material-symbols-outlined text-lg">chat</span>
+                          {unreadCounts[String(ref.id)] > 0 && (
+                            <span className="absolute -top-1 -right-1 size-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-white dark:ring-slate-800">
+                              {unreadCounts[String(ref.id)]}
+                            </span>
+                          )}
+                        </button>
+                      </td>
                       <td className="px-6 py-4 text-right">
                         <button onClick={() => navigate(`/doctor/referral/${ref.id}`)} className="text-primary hover:bg-primary/10 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors">Review →</button>
                       </td>
@@ -149,6 +179,25 @@ export default function DoctorDashboard() {
           </section>
         </div>
       </main>
+      <AnimatePresence>
+        {chatOpen && (
+          <ChatPanel
+            referralId={chatOpen}
+            currentUserType="doctor"
+            currentUserId={doctor.id}
+            partnerName={chatPartner.name}
+            disease={chatPartner.disease}
+            onClose={() => {
+              setChatOpen(null);
+              if (referrals.length > 0) {
+                api.getUnreadCounts(referrals.map(r => r.id), 'doctor')
+                  .then(setUnreadCounts)
+                  .catch(() => {});
+              }
+            }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api, type Referral } from '../api';
+import ThemeToggle from '../components/ThemeToggle';
+import ChatPanel from '../components/ChatPanel';
+import { AnimatePresence } from 'motion/react';
 
 export default function ReferralDetail() {
   const navigate = useNavigate();
@@ -10,6 +13,8 @@ export default function ReferralDetail() {
   const [status, setStatus] = useState('Pending');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+  const doctor = JSON.parse(sessionStorage.getItem('doctor') || '{}');
 
   useEffect(() => {
     if (!id) return;
@@ -50,12 +55,14 @@ export default function ReferralDetail() {
               </div>
               <h2 className="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight tracking-[-0.015em]">MediDiag</h2>
             </div>
-            <div className="flex gap-3">
-              <button className="flex items-center justify-center rounded-lg h-10 w-10 bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
-                <span className="material-symbols-outlined">notifications</span>
-              </button>
-              <button className="flex items-center justify-center rounded-lg h-10 w-10 bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
-                <span className="material-symbols-outlined">account_circle</span>
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+              <button
+                onClick={() => setChatOpen(true)}
+                className="flex items-center justify-center rounded-lg h-10 px-4 bg-primary/10 text-primary hover:bg-primary/20 transition-colors gap-1.5 font-semibold text-sm"
+              >
+                <span className="material-symbols-outlined text-lg">chat</span>
+                <span className="hidden sm:inline">Chat</span>
               </button>
             </div>
           </header>
@@ -190,6 +197,18 @@ export default function ReferralDetail() {
           </main>
         </div>
       </div>
+      <AnimatePresence>
+        {chatOpen && referral && (
+          <ChatPanel
+            referralId={referral.id}
+            currentUserType="doctor"
+            currentUserId={doctor.id}
+            partnerName={referral.patient_name}
+            disease={referral.predicted_disease}
+            onClose={() => setChatOpen(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -2,6 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, type DiagnosisRecord, type Referral } from '../api';
 import NotificationBell from '../components/NotificationBell';
+import ThemeToggle from '../components/ThemeToggle';
+import ChatPanel from '../components/ChatPanel';
+import { AnimatePresence } from 'motion/react';
 
 type Tab = 'history' | 'referrals';
 type FilterOption = 'All' | 'Referral Issued' | 'No Referral';
@@ -27,6 +30,10 @@ export default function DiagnosisHistory() {
   const [referralsLoading, setReferralsLoading] = useState(true);
   const [referralsError, setReferralsError] = useState<string | null>(null);
 
+  const [chatOpen, setChatOpen] = useState<number | null>(null); // referral ID or null
+  const [chatPartner, setChatPartner] = useState({ name: '', disease: '' });
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
+
   // ── Fetch history on mount ─────────────────────────────────────────
   useEffect(() => {
     if (patient.id) {
@@ -50,6 +57,16 @@ export default function DiagnosisHistory() {
       setReferralsLoading(false);
     }
   }, []);
+
+  // ── Fetch unread message counts ─────────────────────────────────────
+  useEffect(() => {
+    if (referrals.length > 0 && patient.id) {
+      const ids = referrals.map(r => r.id);
+      api.getUnreadCounts(ids, 'patient')
+        .then(setUnreadCounts)
+        .catch(() => {});
+    }
+  }, [referrals]);
 
   // ── Close filter dropdown on outside click ─────────────────────────
   useEffect(() => {
@@ -114,6 +131,7 @@ export default function DiagnosisHistory() {
               <span className="material-symbols-outlined text-primary group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
               <span className="ml-1 font-semibold text-primary">Back</span>
             </button>
+            <ThemeToggle />
             <NotificationBell patientId={patient.id} />
             <button onClick={() => { sessionStorage.removeItem('patient'); navigate('/patient/login'); }} className="flex items-center justify-center p-2 px-4 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm font-bold hover:bg-red-100 transition-colors gap-1">
               <span className="material-symbols-outlined text-sm">logout</span>
@@ -265,7 +283,21 @@ export default function DiagnosisHistory() {
                 <div key={ref.id} className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-primary/5 hover:shadow-md transition-shadow">
                   <div className="flex justify-between items-start mb-3">
                     <h2 className="text-xl font-bold text-primary">{ref.predicted_disease}</h2>
-                    {statusBadge(ref.status)}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => { setChatOpen(ref.id); setChatPartner({ name: ref.doctor_name || 'Doctor', disease: ref.predicted_disease }); }}
+                        className="relative size-9 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary flex items-center justify-center transition-colors"
+                        title="Chat with doctor"
+                      >
+                        <span className="material-symbols-outlined text-lg">chat</span>
+                        {unreadCounts[String(ref.id)] > 0 && (
+                          <span className="absolute -top-1 -right-1 size-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-white dark:ring-slate-800">
+                            {unreadCounts[String(ref.id)]}
+                          </span>
+                        )}
+                      </button>
+                      {statusBadge(ref.status)}
+                    </div>
                   </div>
 
                   {/* Doctor info */}
@@ -310,6 +342,28 @@ export default function DiagnosisHistory() {
           </div>
         )}
       </div>
+
+      {/* ── Chat Panel ───────────────────────────────────────────── */}
+      <AnimatePresence>
+        {chatOpen && (
+          <ChatPanel
+            referralId={chatOpen}
+            currentUserType="patient"
+            currentUserId={patient.id}
+            partnerName={chatPartner.name}
+            disease={chatPartner.disease}
+            onClose={() => {
+              setChatOpen(null);
+              // Refresh unread counts
+              if (referrals.length > 0) {
+                api.getUnreadCounts(referrals.map(r => r.id), 'patient')
+                  .then(setUnreadCounts)
+                  .catch(() => {});
+              }
+            }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* ── Decorative gradients ──────────────────────────────────── */}
       <div className="fixed top-0 right-0 -z-10 w-1/3 h-1/2 bg-gradient-to-bl from-primary/5 to-transparent pointer-events-none"></div>
