@@ -44,7 +44,7 @@ export default function DoctorRegistration() {
   };
 
   return (
-    <div className="bg-[#F3E5F5] dark:bg-background-dark font-display min-h-screen flex flex-col items-center justify-center p-4">
+    <div className="bg-background-light dark:bg-background-dark font-display min-h-screen flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-[520px] bg-white dark:bg-slate-900 rounded-xl shadow-xl overflow-hidden">
         <div className="p-8 md:p-12">
           <header className="flex flex-col items-center gap-6 mb-8">
