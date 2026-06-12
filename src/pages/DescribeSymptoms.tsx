@@ -93,6 +93,7 @@ export default function DescribeSymptoms() {
           <button
             onClick={() => {
               sessionStorage.removeItem('patient');
+              localStorage.removeItem('patient');
               navigate('/patient/login');
             }}
             className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-red-50 border border-red-200 text-red-600 text-sm font-bold hover:bg-red-100 transition-colors gap-1"

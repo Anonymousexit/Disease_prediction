@@ -133,7 +133,7 @@ export default function DiagnosisHistory() {
             </button>
             <ThemeToggle />
             <NotificationBell patientId={patient.id} />
-            <button onClick={() => { sessionStorage.removeItem('patient'); navigate('/patient/login'); }} className="flex items-center justify-center p-2 px-4 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm font-bold hover:bg-red-100 transition-colors gap-1">
+            <button onClick={() => { sessionStorage.removeItem('patient'); localStorage.removeItem('patient'); navigate('/patient/login'); }} className="flex items-center justify-center p-2 px-4 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm font-bold hover:bg-red-100 transition-colors gap-1">
               <span className="material-symbols-outlined text-sm">logout</span>
               Logout
             </button>

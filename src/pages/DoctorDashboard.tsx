@@ -58,7 +58,7 @@ export default function DoctorDashboard() {
             <span className="material-symbols-outlined text-lg">person</span>
             <span className="hidden md:inline">Patient Portal</span>
           </button>
-          <button onClick={() => { sessionStorage.removeItem('doctor'); navigate('/doctor'); }} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors">
+          <button onClick={() => { sessionStorage.removeItem('doctor'); localStorage.removeItem('doctor'); navigate('/doctor'); }} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors">
             <span className="material-symbols-outlined text-lg">logout</span>
             <span className="hidden md:inline">Sign Out</span>
           </button>
