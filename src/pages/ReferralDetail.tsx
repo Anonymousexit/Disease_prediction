@@ -138,8 +138,8 @@ export default function ReferralDetail() {
                         <span className="material-symbols-outlined text-primary text-sm">verified_user</span>
                         <span className="text-xs font-bold text-primary">CONFIDENCE SCORE</span>
                       </div>
-                      <p className="text-sm font-semibold">{referral.confidence >= 85 ? 'High' : 'Low'} Confidence ({referral.confidence}%)</p>
-                      <p className="text-xs text-slate-500">{referral.confidence < 85 ? 'Below 85% threshold — specialist review required.' : 'Model prediction is above the confidence threshold.'}</p>
+                      <p className="text-sm font-semibold">{referral.confidence >= 90 ? 'High' : 'Low'} Confidence ({referral.confidence}%)</p>
+                      <p className="text-xs text-slate-500">{referral.confidence < 90 ? 'Below 90% threshold — specialist review required.' : 'Model prediction is above the confidence threshold.'}</p>
                     </div>
                   </div>
                 </div>
@@ -185,7 +185,7 @@ export default function ReferralDetail() {
                     <h4 className="font-bold text-sm">Referral Reason (from system)</h4>
                   </div>
                   <p className="text-sm text-rose-800 dark:text-rose-300 leading-relaxed italic">
-                    "AI model prediction confidence ({referral.confidence}%) was below the 85% specialist-review threshold for {referral.predicted_disease}. Doctor consultation required for clinical validation and treatment authorization."
+                    "AI model prediction confidence ({referral.confidence}%) was below the 90% specialist-review threshold for {referral.predicted_disease}. Doctor consultation required for clinical validation and treatment authorization."
                   </p>
                   <div className="mt-3 flex items-center justify-between text-[10px] text-rose-600/60 dark:text-rose-400/60 uppercase font-bold">
                     <span>System Generated</span>

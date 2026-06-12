@@ -238,7 +238,7 @@ export default function DiagnosisResult() {
                           <div>
                             <h3 className="text-lg font-bold text-orange-900 dark:text-orange-200">Doctor Referral Recommended</h3>
                             <p className="text-orange-800 dark:text-orange-300 text-sm mt-1">
-                              Since the confidence score is below 85%, we highly recommend consulting a certified specialist to verify these results and begin appropriate treatment.
+                              Since the confidence score is below 90%, we highly recommend consulting a certified specialist to verify these results and begin appropriate treatment.
                             </p>
                           </div>
                           {error && <p className="text-red-600 text-sm">{error}</p>}

@@ -122,5 +122,5 @@ class MLService:
             "confidence": confidence,
             "probabilities": all_probs,
             "medicine": medicine,
-            "requires_referral": confidence < 85,
+            "requires_referral": confidence < 90,
         }
