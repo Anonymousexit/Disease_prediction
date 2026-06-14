@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { api, type Doctor, type DiagnosisResult as DiagResult } from '../api';
-import NotificationBell from '../components/NotificationBell';
-import ThemeToggle from '../components/ThemeToggle';
+import PatientNav from '../components/PatientNav';
 
 export default function DiagnosisResult() {
   const location = useLocation();
@@ -73,29 +72,7 @@ export default function DiagnosisResult() {
     <div className="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
       <div className="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
         <div className="layout-container flex h-full grow flex-col">
-          <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 md:px-10 py-3 sticky top-0 z-50">
-            <div className="flex items-center gap-4">
-              <div className="size-8 flex items-center justify-center bg-primary rounded-lg text-white">
-                <span className="material-symbols-outlined">medical_services</span>
-              </div>
-              <h2 className="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-tight">MediDiag</h2>
-            </div>
-            <div className="flex flex-1 justify-end gap-3 items-center">
-              <div className="hidden md:flex flex-col items-end mr-2">
-                <p className="text-slate-900 dark:text-white text-sm font-bold">{patient.full_name || 'Patient'}</p>
-                <p className="text-slate-500 dark:text-slate-400 text-xs">Patient ID: #{patient.id || '—'}</p>
-              </div>
-              <div className="bg-primary/10 rounded-full size-10 flex items-center justify-center border border-primary/20 text-primary font-bold text-lg">
-                {(patient.full_name || 'P')[0]}
-              </div>
-              <ThemeToggle />
-              <NotificationBell patientId={patient.id} />
-              <button onClick={() => { sessionStorage.removeItem('patient'); localStorage.removeItem('patient'); navigate('/patient/login'); }} className="flex items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-red-50 border border-red-200 text-red-600 text-sm font-bold hover:bg-red-100 transition-colors gap-1">
-                <span className="material-symbols-outlined text-sm">logout</span>
-                <span className="hidden sm:inline">Logout</span>
-              </button>
-            </div>
-          </header>
+          <PatientNav patientId={patient.id} patientName={patient.full_name} />
 
           <main className="flex flex-1 justify-center py-8 px-4 md:px-10">
             <div className={`layout-content-container flex flex-col flex-1 gap-6 ${isHighConfidence ? 'max-w-[800px]' : 'max-w-[960px]'}`}>

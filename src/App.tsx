@@ -14,6 +14,7 @@ import DoctorLogin from './pages/DoctorLogin';
 import DoctorRegistration from './pages/DoctorRegistration';
 import DoctorDashboard from './pages/DoctorDashboard';
 import ReferralDetail from './pages/ReferralDetail';
+import PatientReferrals from './pages/PatientReferrals';
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/symptoms" element={<SymptomSelection />} />
         <Route path="/diagnosis" element={<DiagnosisResult />} />
         <Route path="/history" element={<DiagnosisHistory />} />
+        <Route path="/referrals" element={<PatientReferrals />} />
         <Route path="/doctor" element={<DoctorLogin />} />
         <Route path="/doctor/register" element={<DoctorRegistration />} />
         <Route path="/doctor/dashboard" element={<DoctorDashboard />} />

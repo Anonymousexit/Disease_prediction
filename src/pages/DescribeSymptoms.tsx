@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, type Symptom } from '../api';
-import NotificationBell from '../components/NotificationBell';
-import ThemeToggle from '../components/ThemeToggle';
+import PatientNav from '../components/PatientNav';
 
 export default function DescribeSymptoms() {
   const navigate = useNavigate();
@@ -63,46 +62,7 @@ export default function DescribeSymptoms() {
   return (
     <div className="bg-slate-50 dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
       {/* ── Header ── */}
-      <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-primary/10 bg-white dark:bg-background-dark px-6 md:px-20 py-4">
-        <div className="flex items-center gap-3">
-          <div className="size-8 text-primary">
-            <span className="material-symbols-outlined text-3xl">medical_services</span>
-          </div>
-          <h2 className="text-slate-900 dark:text-white text-xl font-bold leading-tight tracking-tight">MediDiag</h2>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="hidden sm:flex items-center gap-3">
-            <div className="text-right">
-              <p className="text-xs text-slate-500 uppercase font-semibold">Patient</p>
-              <p className="text-sm font-bold">{patient.full_name || 'Patient'}</p>
-            </div>
-            <div className="bg-primary/10 rounded-full p-1">
-              <div className="bg-primary rounded-full size-10 flex items-center justify-center text-white font-bold text-lg">
-                {(patient.full_name || 'P')[0]}
-              </div>
-            </div>
-          </div>
-          <ThemeToggle />
-          <NotificationBell patientId={patient.id} />
-          <button
-            onClick={() => navigate('/history')}
-            className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 border border-primary text-primary text-sm font-bold hover:bg-primary/5 transition-colors"
-          >
-            <span className="truncate">View History</span>
-          </button>
-          <button
-            onClick={() => {
-              sessionStorage.removeItem('patient');
-              localStorage.removeItem('patient');
-              navigate('/patient/login');
-            }}
-            className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-red-50 border border-red-200 text-red-600 text-sm font-bold hover:bg-red-100 transition-colors gap-1"
-          >
-            <span className="material-symbols-outlined text-sm">logout</span>
-            <span className="truncate">Logout</span>
-          </button>
-        </div>
-      </header>
+      <PatientNav patientId={patient.id} patientName={patient.full_name} />
 
       {/* ── Main ── */}
       <main className="flex-1 flex items-center justify-center p-6">
